@@ -1,0 +1,51 @@
+define bot refuse_injection_attempt
+  "⛔ Security Alert: Prompt injection attempt detected. This action has been blocked and logged."
+
+define bot refuse_jailbreak_attempt
+  "⛔ Security Alert: Jailbreak attempt detected. All safety guidelines remain active."
+
+define bot refuse_data_extraction
+  "⛔ Security Alert: Data extraction attempt detected. Access denied."
+
+define bot refuse_with_pii_warning
+  "⛔ Security Alert: Response contained sensitive information and has been blocked."
+
+define subflow prompt_injection_detection
+  """Detects common prompt injection patterns in user input."""
+  $lower_message = $user_message.lower()
+
+  if "ignore previous instructions" in $lower_message or "ignore all instructions" in $lower_message or "forget all prior instructions" in $lower_message or "pls ignore" in $lower_message or "ignore prev" in $lower_message
+    bot refuse_injection_attempt
+    stop
+
+  if "###system" in $lower_message or "system prompt" in $lower_message or "sys prompt" in $lower_message
+    bot refuse_injection_attempt
+    stop
+
+  if "developer mode" in $lower_message or "do anything now" in $lower_message
+    bot refuse_injection_attempt
+    stop
+
+define subflow jailbreak_prevention
+  """Detects jailbreak attempts like DAN."""
+  $lower_message = $user_message.lower()
+
+  if "dan" in $lower_message or "jailbreak" in $lower_message
+    bot refuse_jailbreak_attempt
+    stop
+
+define subflow pii_extraction_blocking
+  """Blocks attempts to extract sensitive data."""
+  $lower_message = $user_message.lower()
+
+  if "list all" in $lower_message or "show me all" in $lower_message
+    bot refuse_data_extraction
+    stop
+
+define subflow pii_leakage_detection
+  """Detects potential PII leakage in bot responses."""
+  $contains_pii = execute check_pii_in_text(text=$bot_message)
+
+  if $contains_pii
+    bot refuse_with_pii_warning
+    stop

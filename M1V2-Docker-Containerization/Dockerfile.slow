@@ -1,0 +1,18 @@
+# ============================================================
+# ❌ BAD PATTERN: Inefficient layer ordering
+# Every code change reinstalls ALL dependencies!
+# ============================================================
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# ❌ BAD: Copy everything first (including code)
+COPY . .
+
+# ❌ BAD: Install after copying code
+# This layer invalidates on ANY file change!
+RUN pip install --no-cache-dir -r requirements.txt
+
+EXPOSE 8000
+
+CMD ["python", "app.py"]

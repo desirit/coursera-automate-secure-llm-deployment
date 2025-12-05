@@ -1,0 +1,18 @@
+models:
+  - type: main
+    engine: ollama
+    model: llama3.1:8b
+
+rails:
+  input:
+    flows:
+      - prompt_injection_detection
+      - jailbreak_prevention
+      - pii_extraction_blocking
+
+  output:
+    flows:
+      - pii_leakage_detection
+
+actions:
+  - actions
